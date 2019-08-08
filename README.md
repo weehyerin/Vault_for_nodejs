@@ -329,6 +329,8 @@ vault operator unseal
 을 입력하면 unseal key를 입력하는 란이 나옴.
 `vault init`으로 나온 결과를 위의 명령어로 하나씩 풀어줘야 함.
 
+**이걸 해주지 않으면 `Vault is sealed`라는 경고창이 뜰 것임**
+
 6. login
 
 ~~~
