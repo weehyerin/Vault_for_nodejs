@@ -239,3 +239,116 @@ kv/phillips 안에 있는 데이터를 읽어오면, json 형식으로 반환하
 
 따라서 한 번 res.data.key를 사용했다면, 아래의 코드에서는 사용할 수가 없음. 즉, 다시 사용하고 싶다면 unseal key를 인증한 후에 다시 접근해서 가져오기. (자세한 예시는 nodes_phillips_using_vault.js를 보고 이해하긴)
 변수에 대입하여 사용할 수도 없음.
+
+
+
+---------
+
+
+# using docker
+
+서버를 다시 실행할 때 마다 root token과 unseal key 가 바뀌어서 실행할 때마다 다시 실행해야 하므로 그 문제를 고치고자 consul을 사용하려하였다.
+
+하지만, consul을 사용하기 위해 config.hcl을 사용하고 
+~~~
+storage "consul" {
+  address = "127.0.0.1:8500"
+  path    = "vault/"
+}
+
+listener "tcp" {
+ address     = "127.0.0.1:8200"
+ tls_disable = 1
+}
+~~~
+을 했을 때, error가 생기고 잡히지 않아서 consul까지 설치된 docker를 사용하고자 하였다. 
+
+## docker 설치
+https://blog.cosmosfarm.com/archives/248/%EC%9A%B0%EB%B6%84%ED%88%AC-18-04-%EB%8F%84%EC%BB%A4-docker-%EC%84%A4%EC%B9%98-%EB%B0%A9%EB%B2%95/
+
+## docker compose 설치
+https://zetawiki.com/wiki/%EC%9A%B0%EB%B6%84%ED%88%AC16_docker-compose_%EC%84%A4%EC%B9%98
+
+## docker(Docker + Consul + Vault) 사용
+
+[출처](http://egloos.zum.com/mcchae/v/11318672)
+
+1. git clone
+~~~
+git clone https://github.com/mcchae/docker_consul_vault.git
+cd docker_consul_vault
+~~~
+
+2. start.sh
+~~~
+sh start.sh
+~~~
+
+3. 서버 실행
+지금까지 `vault server -dev`로 하였지만, docker로 다운받은 vault를 실행할 것이기 때문에 아래처럼 실행해주면 됨.
+~~~
+docker-compose up
+~~~
+
+4. 다른 터미널 창에서..
+
+~~~
+export VAULT_ADDR='http://127.0.0.1:8200'
+
+vault status
+~~~
+
+출처 링크에서는 아래와 같이 설명되어 있었다.
+> dhv 다커 마운트 폴더에 key.txt 가 없으면 scripts/setup.sh 를 실행시키고,
+> 아니고 있으면 scripts/unseal.sh 를 실행시킵니다.
+
+나는 key.txt 가 없었는데, `sh scripts/setup.sh`이 실행이 안되었다. 
+key.txt의 역할은 vault init에 있는 값들을 저장해놓기 위한 것이어서 그냥 client에서 vault init을 하고 그 결과를 key.txt 파일을 만들어서 직접 저장해주었다.
+
+~~~
+vault init
+~~~
+
+위의 결과를
+
+~~~
+vi /dhv/key.txt
+~~~
+
+에 저장해주었다.
+
+5. unseal
+
+vault init의 결과로 5개의 unseal key와 root token을 알 수 있다. 
+secret engine을 만들고 사용을 하려면, unseal key가 sealing되어 있는 것을 unseal 해주어야 하고, root token으로 login을 해주어야 한다. 
+
+~~~
+vault operator unseal
+~~~
+
+을 입력하면 unseal key를 입력하는 란이 나옴.
+`vault init`으로 나온 결과를 위의 명령어로 하나씩 풀어줘야 함.
+
+6. login
+
+~~~
+vault login <root token>
+~~~
+
+`vault init`으로 알아낸 root token으로 로그인을 해주어야 사용이 가능함. 그렇지 않으면 `permission denied`가 뜰 것.
+
+여기까지 해주면 위에서 secret engine을 만들고, path 경로로 data를 넣어주는 게 가능함
+
+7. server 종료
+~~~
+docker-compose down
+~~~
+
+을 해주면 server가 종료됨.
+서버를 다시 실행한다고 해도, unseal key와 root token은 변함이 없으니 nodejs 코드에 root token과 unseal key를 바꿔주지 않아도 사용 가능!
+
+
+
+
+
+
