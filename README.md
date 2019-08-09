@@ -52,7 +52,33 @@ vault --version
 ~~~
 ![image](https://user-images.githubusercontent.com/37536415/62678767-58388e80-b9ed-11e9-9983-9b3cc33f5ed7.png)
 
->> consul이란, 클라우드 환경에서 MicroService Architecture 에서 서비스간 통신을 위한 메커니즘 구현을 쉽게 해주는 것
+>> consul이란, 클라우드 환경에서 Micro Service Architecture 에서 서비스간 통신을 위한 메커니즘 구현을 쉽게 해주는 것
+
+
+### consul
+
+[출처 : 조대협](http://bcho.tistory.com)
+
+
+MSA(Micro Service Architecture)와 같은 분산 환경은 서비스 간의 원격 호출로 구성이 된다. 원격 서비스 호출은 IP 주소와 포트를 이용하는 방식이 되는다. 
+
+클라우드 환경이 되면서 서비스가 오토 스케일링등에 의해서 동적으로 생성되거나 컨테이너 기반의 배포로 인해서, 서비스의 IP가 동적으로 변경되는 일이 잦아졌다.
+
+
+![image](https://user-images.githubusercontent.com/37536415/62753936-ad85a600-baa8-11e9-9cfc-4db4da941d2f.png)
+
+
+
+그래서 서비스 클라이언트가 서비스를 호출할때 서비스의 위치 (즉 IP주소와 포트)를 알아낼 수 있는 기능이 필요한데, 이것을 바로 서비스 디스커버리 (Service discovery)라고 한다.
+
+
+
+다음 그림을 보자 Service A의 인스턴스들이 생성이 될때, Service A에 대한 주소를 **Service registry (서비스 등록 서버) 에 등록**해놓는다. Service A를 호출하고자 하는 클라이언트는 Service registry에 Service A의 주소를 물어보고 등록된 주소를 받아서 그 주소로 서비스를 호출한다.
+
+![image](https://user-images.githubusercontent.com/37536415/62753937-b24a5a00-baa8-11e9-8fc9-247dfb346a3f.png)
+
+
+
 
 
 -------
